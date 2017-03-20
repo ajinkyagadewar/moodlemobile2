@@ -9,3 +9,8 @@ www/build
 .sass-cache/
 www/lib
 e2e/build
+.DS_Store
+resources/.DS_Store
+resources/android/.DS_Store
+resources/ios/.DS_Store
+www/.DS_Store

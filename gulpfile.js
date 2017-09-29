@@ -7,7 +7,7 @@ var stripComments = require('gulp-strip-comments');
 var removeEmptyLines = require('gulp-remove-empty-lines');
 var clipEmptyFiles = require('gulp-clip-empty-files');
 var sass = require('gulp-sass');
-var minifyCss = require('gulp-minify-css');
+var cleanCSS = require('gulp-clean-css');
 var rename = require('gulp-rename');
 var tap = require('gulp-tap');
 var fs = require('fs');
@@ -19,6 +19,7 @@ var gulpSlash = require('gulp-slash');
 var ngAnnotate = require('gulp-ng-annotate');
 var yargs = require('yargs');
 var zip = require('gulp-zip');
+var clean = require('gulp-clean');
 
 // Given a list of paths to search and the path to an addon, return the list of paths to search only inside the addon folder.
 function getRemoteAddonPaths(paths, pathToAddon) {
@@ -123,6 +124,10 @@ function treatMergedData(data) {
     } else if (filepath.indexOf('core/assets/countries') === 0) {
 
       addProperties(merged, data[filepath], 'mm.core.country-');
+
+    } else if (filepath.indexOf('core/assets/mimetypes') === 0) {
+
+      addProperties(merged, data[filepath], 'mm.core.mimetype-');
 
     }
   }
@@ -334,6 +339,7 @@ var paths = {
   ],
   sass: {
     core: [
+      './www/core/scss/styles.scss',
       './www/core/scss/*.scss',
       './www/core/components/**/scss/*.scss',
       './www/addons/**/scss/*.scss',
@@ -350,6 +356,7 @@ var paths = {
     './www/core/components/**/lang/',
     './www/addons/**/lang/',
     './www/core/assets/countries/',
+    './www/core/assets/mimetypes/',
     '!./www/**/' + remoteAddonPackageFolder + '/*.json',
     '!./www/**/' + remoteAddonPackageFolder + '/**/*.json',
   ],
@@ -408,7 +415,7 @@ gulp.task('sass', ['sass-build'], function(done) {
     .pipe(concat('mm.bundle.css'))
     .pipe(sass())
     .pipe(gulp.dest(paths.build))
-    .pipe(minifyCss({
+    .pipe(cleanCSS({
       keepSpecialComments: 0
     }))
     .pipe(rename({ extname: '.min.css' }))
@@ -758,13 +765,16 @@ gulp.task('remoteaddon-build', ['remoteaddon-copy'], function(done) {
   pathToReplace = newYargs.argv.jspath;
   if (typeof pathToReplace == 'undefined') {
     if (path.indexOf('www') === 0) {
-      pathToReplace = path.replace('www/', '');
+      pathToReplace = path.replace(/www[\/\\]/, '');
     } else {
       pathToReplace = path;
     }
   }
 
   jsPaths = getRemoteAddonPaths(remoteAddonPaths.js, path);
+
+  // Convert all backslash (\) to slash (/) to make it work in Windows.
+  pathToReplace = pathToReplace.replace(/\\/g, '/');
 
   if (pathToReplace.slice(-1) == '/') {
     wildcard = wildcard + '/';
@@ -893,4 +903,49 @@ gulp.task('remoteaddon', ['remoteaddon-build', 'remoteaddon-sass', 'remoteaddon-
       deleteFolderRecursive(pathToPackageFolder);
       done();
     });
+});
+
+// Cleans the development environment by deleting downloaded files and libraries
+gulp.task('clean-libs', ['clean-www-libs', 'clean-ionic-platforms', 'clean-e2e-build', 'clean-sass-cache', 'clean-ionic-plugins']);
+
+// Removes the contents in the /www/lib/ directory
+gulp.task('clean-www-libs', function() {
+  return gulp.src('www/lib/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /platforms directory
+gulp.task('clean-ionic-platforms', function() {
+  return gulp.src('platforms/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /plugins directory
+gulp.task('clean-ionic-plugins', function() {
+  return gulp.src('plugins/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /www/build directory
+gulp.task('clean-build', function() {
+  return gulp.src('www/build/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /e2e/build directory
+gulp.task('clean-e2e-build', function() {
+  return gulp.src('e2e/build/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /.sass-cache directory
+gulp.task('clean-sass-cache', function() {
+  return gulp.src('.sass-cache/', {read: false})
+    .pipe(clean());
+});
+
+// Removes the contents in the /node-modules directory
+gulp.task('clean-node-modules', function() {
+  return gulp.src('node_modules/', {read: false})
+    .pipe(clean());
 });

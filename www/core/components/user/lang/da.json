@@ -7,7 +7,7 @@
     "details": "Detaljer",
     "detailsnotavailable": "Denne brugers data er ikke tilgængelige for dig.",
     "editingteacher": "Lærer",
-    "email": "Email",
+    "email": "E-mail",
     "emailagain": "E-mail (igen)",
     "firstname": "Fornavn",
     "interests": "Interesser",
@@ -18,8 +18,9 @@
     "phone1": "Telefon",
     "phone2": "Mobil",
     "roles": "Roller",
+    "sendemail": "E-mail",
     "student": "Studerende",
     "teacher": "Medlærer",
-    "viewprofile": "Vis Profil",
+    "viewprofile": "Vis profil",
     "webpage": "Webside"
 }

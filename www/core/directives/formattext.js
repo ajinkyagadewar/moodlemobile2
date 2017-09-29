@@ -256,7 +256,12 @@ angular.module('mm.core')
                             container = angular.element('<span class="mm-adapted-img-container"></span>'),
                             jqImg = angular.element(img);
 
-                        container.css('float', img.style.float); // Copy the float to corretly position the search icon.
+                        container.css('float', img.style.float); // Copy the float to correctly position the search icon.
+                        if (jqImg.hasClass('atto_image_button_right')) {
+                            container.addClass('atto_image_button_right');
+                        } else if (jqImg.hasClass('atto_image_button_left')) {
+                            container.addClass('atto_image_button_left');
+                        }
                         jqImg.wrap(container);
 
                         if (imgWidth > elWidth) {
@@ -271,6 +276,10 @@ angular.module('mm.core')
 
             angular.forEach(dom.find('audio'), function(el) {
                 treatMedia(el, component, componentId, siteId);
+                if (ionic.Platform.isIOS()) {
+                    // Set data-tap-disabled="true" to make slider work in iOS.
+                    el.setAttribute('data-tap-disabled', true);
+                }
             });
             angular.forEach(dom.find('video'), function(el) {
                 treatVideoFilters(el);
@@ -337,7 +346,7 @@ angular.module('mm.core')
             return;
         }
 
-        var data = JSON.parse(el.getAttribute('data-setup') || '{}'),
+        var data = JSON.parse(el.getAttribute('data-setup') || el.getAttribute('data-setup-lazy') || '{}'),
             youtubeId = data.techOrder && data.techOrder[0] && data.techOrder[0] == 'youtube' && data.sources && data.sources[0] &&
                 data.sources[0].src && youtubeGetId(data.sources[0].src);
 
